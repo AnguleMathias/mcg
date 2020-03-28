@@ -20,7 +20,7 @@ from utils import custom_logger
 # CURRENT_DIR = /Users/mathias/Desktop/mcg
 CURRENT_DIR = "."
 WINDOW_SIZE = "1024,2080"
-URL = "https://www.mcg.com/about/company-overview/"
+URL = "https://www.mcg.com/care-guidelines/care-guidelines/"
 SCROLL_PAUSE_TIME = 3
 EXCEPTION_SLEEP_TIME = 2
 
@@ -51,7 +51,7 @@ driver.get(URL)
 try:
     logger.info("Waiting for page to load...")
     el = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.NAME, "layer__content"))
+        EC.presence_of_element_located((By.CLASS_NAME, "layer__content"))
     )
 except TimeoutException as err:
     logger.info("Page did not fully load in due time. Trying again")
@@ -60,7 +60,7 @@ except TimeoutException as err:
     while failed:
         try:
             el = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.NAME, "layer__content"))
+                EC.presence_of_element_located((By.CLASS_NAME, "layer__content"))
             )
         except TimeoutException as err:
             if tries >= 10:
@@ -78,3 +78,9 @@ except TimeoutException as err:
 logger.info("Page loaded successfully")
 time.sleep(3)
 
+csv_path = f"{CURRENT_DIR}/csv/mcg_{current_time}.csv"
+fp = open(csv_path, "w")
+wr = csv.writter(fp, dialect='excel')
+wr.writerow(['Article heading', 'article body'])
+
+logger.info(f"Writing data to {csv_path}...")
