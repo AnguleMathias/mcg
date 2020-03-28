@@ -15,7 +15,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from utils import custom_logger
+from utils import custom_logger, paste_csv_to_wks
 
 CURRENT_DIR = "."
 WINDOW_SIZE = "1024,2080"
