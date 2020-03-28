@@ -1,6 +1,7 @@
 import csv
 import re
 import time
+import gspread
 
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -19,15 +20,13 @@ from utils import custom_logger
 CURRENT_DIR = "."
 WINDOW_SIZE = "1024,2080"
 URL = "https://www.mcg.com/care-guidelines/care-guidelines/"
-SCROLL_PAUSE_TIME = 3
-EXCEPTION_SLEEP_TIME = 2
 
 current_time = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 filename = f"{CURRENT_DIR}/logs/scraped_{current_time}.log"
 
 logger = custom_logger(filename)
 
-logger.info(f"Logfile name {filename}")
+logger.info(f"Log file name {filename}")
 
 # Chrome browser options - Version 79.0.3945.88 (Official Build) (64-bit)
 chrome_options = Options()
@@ -48,7 +47,7 @@ driver.get(URL)
 
 try:
     logger.info("Waiting for page to load...")
-    el = WebDriverWait(driver, 10).until(
+    elem = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CLASS_NAME, "layer__content"))
     )
 except TimeoutException as err:
@@ -57,7 +56,7 @@ except TimeoutException as err:
     tries = 0
     while failed:
         try:
-            el = WebDriverWait(driver, 10).until(
+            elem = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "layer__content"))
             )
         except TimeoutException as err:
@@ -103,7 +102,7 @@ while True:
         wr = csv.writer(fp, dialect="excel")
         wr.writerow(line)
 
-        driver.find_element_by_xpath("/html/body/main/section/div/div/article/h3")
+        driver.find_element_by_xpath("/html/body/main/section/div/div/article/h3[1]")
         break
 
         logger.info(f"Writing data to {csv_path}...")
@@ -111,9 +110,23 @@ while True:
     except NoSuchElementException:
         fp.close()
 
-        content = open(csv_path, "r", encoding="utf-8").read()
+content = open(csv_path, "r", encoding="utf-8").read()
 
-        logger.info("Write csv content to mcg googlesheet")
+logger.info("Write csv content to mcg googlesheet")
 
-        driver.quit()
-        break
+scope = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/drive",
+]
+
+credentials = ServiceAccountCredentials.from_json_keyfile_name(
+    f"{CURRENT_DIR}/mcg-scraper-fb4e0f7c974e.json", scope
+)
+
+gc = gspread.authorize(credentials)
+wks = gc.open("mcg")
+paste_csv_to_wks(csv_path, wks, "A2")
+
+logger.info("Writing complete!")
+
+driver.quit()
