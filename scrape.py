@@ -4,17 +4,15 @@ import time
 
 from bs4 import BeautifulSoup
 from datetime import datetime
+from oauth2client.service_account import ServiceAccountCredentials
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver import ActionChains
 from selenium.common.exceptions import JavascriptException
-from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from utils import custom_logger
 
@@ -109,7 +107,13 @@ while True:
         break
 
         logger.info(f"Writing data to {csv_path}...")
-        
+
     except NoSuchElementException:
-      fp.close()
-      break
+        fp.close()
+
+        content = open(csv_path, "r", encoding="utf-8").read()
+
+        logger.info("Write csv content to mcg googlesheet")
+
+        driver.quit()
+        break
