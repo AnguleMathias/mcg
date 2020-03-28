@@ -15,6 +15,8 @@ from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import ElementClickInterceptedException
 
+from utils import custom_logger
+
 # CURRENT_DIR = /Users/mathias/Desktop/mcg
 CURRENT_DIR = '.'
 WINDOW_SIZE = '1024,2080'
