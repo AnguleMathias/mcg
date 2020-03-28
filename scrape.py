@@ -18,7 +18,6 @@ from selenium.common.exceptions import ElementClickInterceptedException
 
 from utils import custom_logger
 
-# CURRENT_DIR = /Users/mathias/Desktop/mcg
 CURRENT_DIR = "."
 WINDOW_SIZE = "1024,2080"
 URL = "https://www.mcg.com/care-guidelines/care-guidelines/"
@@ -81,7 +80,7 @@ time.sleep(3)
 
 csv_path = f"{CURRENT_DIR}/csv/mcg_{current_time}.csv"
 fp = open(csv_path, "w")
-wr = csv.writter(fp, dialect="excel")
+wr = csv.writer(fp, dialect="excel")
 wr.writerow(["article", "p"])
 
 logger.info(f"Writing data to {csv_path}...")
@@ -89,32 +88,28 @@ logger.info(f"Writing data to {csv_path}...")
 while True:
     time.sleep(3)
     try:
-        paragraph_blocks = driver.find_element_by_xpath(
-            "/html/body/main/section/div/div/article/p[1]"
-        )
+        line = []
+        article = driver.find_element_by_xpath(
+            "/html/body/main/section/div/div/article"
+        ).text
+        line.append(article)
 
-        for paragraph in paragraph_blocks:
-            line = []
-            article = paragraph.find_element_by_xpath(
-                "/html/body/main/section/div/div/article"
-            ).text
-            line.append(article)
-
-            p = paragraph.find_element_by_xpath(
-                "/html/body/main/section/div/div/article/p"
-            ).text
-            p = BeautifulSoup(p, "lxml").text
-            cleaner = re.compile("<.*?>")
-            cleaned_text = re.sub(cleaner, "", text)
-            line.append(cleaned_text)
+        p = driver.find_element_by_xpath(
+            "/html/body/main/section/div/div/article/p"
+        ).text
+        p = BeautifulSoup(p, "lxml").text
+        cleaner = re.compile("<.*?>")
+        cleaned_text = re.sub(cleaner, "", p)
+        line.append(cleaned_text)
 
         wr = csv.writer(fp, dialect="excel")
         wr.writerow(line)
 
-    except NoSuchElementException:
-        logger.info(f"Writing data to {csv_path}...")
-
-        fp.close()
-
+        driver.find_element_by_xpath("/html/body/main/section/div/div/article/h3")
         break
 
+        logger.info(f"Writing data to {csv_path}...")
+        
+    except NoSuchElementException:
+      fp.close()
+      break
