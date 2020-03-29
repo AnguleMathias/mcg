@@ -78,7 +78,7 @@ time.sleep(3)
 csv_path = f"{CURRENT_DIR}/csv/mcg_{current_time}.csv"
 fp = open(csv_path, "w")
 wr = csv.writer(fp, dialect="excel")
-wr.writerow(["article", "p"])
+wr.writerow(["heading", "paragraph"])
 
 logger.info(f"Writing data to {csv_path}...")
 
@@ -86,17 +86,17 @@ while True:
     time.sleep(3)
     try:
         line = []
-        article = driver.find_element_by_xpath(
-            "/html/body/main/section/div/div/article"
+        heading = driver.find_element_by_xpath(
+            "/html/body/main/section/div/div/article/h2"
         ).text
-        line.append(article)
+        line.append(heading)
 
-        p = driver.find_element_by_xpath(
+        paragraph = driver.find_element_by_xpath(
             "/html/body/main/section/div/div/article/p"
         ).text
-        p = BeautifulSoup(p, "lxml").text
+        paragraph = BeautifulSoup(paragraph, "lxml").text
         cleaner = re.compile("<.*?>")
-        cleaned_text = re.sub(cleaner, "", p)
+        cleaned_text = re.sub(cleaner, "", paragraph)
         line.append(cleaned_text)
 
         wr = csv.writer(fp, dialect="excel")
@@ -105,12 +105,15 @@ while True:
         driver.find_element_by_xpath("/html/body/main/section/div/div/article/h3[1]")
         break
 
+        fp.close()
+
         logger.info(f"Writing data to {csv_path}...")
 
     except NoSuchElementException:
-        fp.close()
+        logger.info(f"Content not written to {csv_path}")
 
-content = open(csv_path, "r", encoding="utf-8").read()
+    break
+fp.close()
 
 logger.info("Write csv content to mcg googlesheet")
 
@@ -125,7 +128,7 @@ credentials = ServiceAccountCredentials.from_json_keyfile_name(
 
 gc = gspread.authorize(credentials)
 wks = gc.open("mcg")
-paste_csv_to_wks(csv_path, wks, "A2")
+paste_csv_to_wks(csv_path, wks, "A1")
 
 logger.info("Writing complete!")
 

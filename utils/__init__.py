@@ -37,6 +37,7 @@ def paste_csv_to_wks(csv_file, sheet, cell):
 
     with open(csv_file, "r", encoding="utf-8") as f:
         csv_contents = f.read()
+
     body = {
         "requests": [
             {
@@ -55,4 +56,3 @@ def paste_csv_to_wks(csv_file, sheet, cell):
     }
 
     return sheet.batch_update(body)
-
